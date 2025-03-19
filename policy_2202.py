@@ -3,20 +3,31 @@ import torch
 import torch.nn as nn
 
 class PolicyNetwork(nn.Module):
-    def __init__(self, input_dim=8, hidden_dim=256, output_dim=4):  # Increased network capacity
+    def __init__(self, input_dim=8, hidden_dim=512, output_dim=4):
         super(PolicyNetwork, self).__init__()
         self.shared = nn.Sequential(
             nn.Linear(input_dim, hidden_dim),
-            nn.ReLU(),  # Changed to ReLU for better gradient flow
+            nn.ReLU(),
             nn.Linear(hidden_dim, hidden_dim),
             nn.ReLU(),
-            nn.Linear(hidden_dim, hidden_dim//2),  # Added extra layer with decrease in dims
+            nn.Linear(hidden_dim, hidden_dim//2),
+            nn.ReLU(),
+            nn.Linear(hidden_dim//2, hidden_dim//4),
             nn.ReLU()
         )
-        self.actor = nn.Linear(hidden_dim//2, output_dim)
-        self.critic = nn.Linear(hidden_dim//2, 1)
+        # Separate actor and critic networks for better specialization
+        self.actor = nn.Sequential(
+            nn.Linear(hidden_dim//4, hidden_dim//4),
+            nn.ReLU(),
+            nn.Linear(hidden_dim//4, output_dim)
+        )
+        self.critic = nn.Sequential(
+            nn.Linear(hidden_dim//4, hidden_dim//4),
+            nn.ReLU(),
+            nn.Linear(hidden_dim//4, 1)
+        )
         
-        # Initialize weights using orthogonal initialization
+        # Adjusted initialization for deeper network
         for layer in self.modules():
             if isinstance(layer, nn.Linear):
                 nn.init.orthogonal_(layer.weight, gain=np.sqrt(2))

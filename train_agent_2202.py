@@ -6,20 +6,31 @@ import torch.optim as optim
 from torch.distributions import Categorical
 
 class PolicyNetwork(nn.Module):
-    def __init__(self, input_dim=8, hidden_dim=256, output_dim=4):  # Increased network capacity
+    def __init__(self, input_dim=8, hidden_dim=512, output_dim=4):
         super(PolicyNetwork, self).__init__()
         self.shared = nn.Sequential(
             nn.Linear(input_dim, hidden_dim),
-            nn.ReLU(),  # Changed to ReLU for better gradient flow
+            nn.ReLU(),
             nn.Linear(hidden_dim, hidden_dim),
             nn.ReLU(),
-            nn.Linear(hidden_dim, hidden_dim//2),  # Added extra layer with decrease in dims
+            nn.Linear(hidden_dim, hidden_dim//2),
+            nn.ReLU(),
+            nn.Linear(hidden_dim//2, hidden_dim//4),
             nn.ReLU()
         )
-        self.actor = nn.Linear(hidden_dim//2, output_dim)
-        self.critic = nn.Linear(hidden_dim//2, 1)
+        # Separate actor and critic networks for better specialization
+        self.actor = nn.Sequential(
+            nn.Linear(hidden_dim//4, hidden_dim//4),
+            nn.ReLU(),
+            nn.Linear(hidden_dim//4, output_dim)
+        )
+        self.critic = nn.Sequential(
+            nn.Linear(hidden_dim//4, hidden_dim//4),
+            nn.ReLU(),
+            nn.Linear(hidden_dim//4, 1)
+        )
         
-        # Initialize weights using orthogonal initialization
+        # Adjusted initialization for deeper network
         for layer in self.modules():
             if isinstance(layer, nn.Linear):
                 nn.init.orthogonal_(layer.weight, gain=np.sqrt(2))
@@ -52,26 +63,26 @@ def train_agent():
     policy = PolicyNetwork()
     optimizer = optim.Adam(policy.parameters(), lr=2.5e-4, eps=1e-5)  # Adjusted learning rate and epsilon
 
-    # Hyperparameter improvements
+    # Hyperparameter improvements - adjusted for 6 hour training
     gamma = 0.99
-    gae_lambda = 0.95
-    clip_epsilon = 0.2
-    ppo_epochs = 10  # Increased epochs for better policy iteration
-    batch_size = 2048  # Reduced batch size for more frequent updates
-    mini_batch_size = 64
-    ent_coef = 0.01
-    vf_coef = 0.5
-    max_grad_norm = 0.5
-    max_timesteps = 1e6
+    gae_lambda = 0.97  # Increased for better advantage estimation
+    clip_epsilon = 0.15  # Reduced for more stable updates
+    ppo_epochs = 5  # Reduced to prevent overfitting over longer training
+    batch_size = 4096  # Doubled for better gradient estimation
+    mini_batch_size = 256  # Increased for better batch statistics
+    ent_coef = 0.008  # Slightly reduced
+    vf_coef = 0.7  # Increased value function importance
+    max_grad_norm = 0.7  # Increased for larger updates when needed
+    max_timesteps = 2.5e7  # ~6 hours based on current speed
     
-    # Added learning rate annealing
-    lr_start = 2.5e-4
-    lr_end = 5e-5
+    # Modified learning rate schedule
+    lr_start = 3e-4  # Slightly increased initial learning rate
+    lr_end = 3e-6  # Lower final learning rate
     
-    # Added reward normalization
+    # Improved reward normalization
     reward_running_mean = 0
     reward_running_std = 1
-    reward_alpha = 0.005  # Running mean decay factor
+    reward_alpha = 0.001  # Reduced for more stable normalization
 
     total_timesteps = 0
     episode = 0
