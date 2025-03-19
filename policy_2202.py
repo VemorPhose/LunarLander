@@ -10,11 +10,11 @@ class PolicyNetwork(nn.Module):
             nn.ReLU(),  # Changed to ReLU for better gradient flow
             nn.Linear(hidden_dim, hidden_dim),
             nn.ReLU(),
-            nn.Linear(hidden_dim, hidden_dim//2),  # Added extra layer with decrease in dims
-            nn.ReLU()
+            # nn.Linear(hidden_dim, hidden_dim//2),  # Added extra layer with decrease in dims
+            # nn.ReLU()
         )
-        self.actor = nn.Linear(hidden_dim//2, output_dim)
-        self.critic = nn.Linear(hidden_dim//2, 1)
+        self.actor = nn.Linear(hidden_dim, output_dim)
+        self.critic = nn.Linear(hidden_dim, 1)
         
         # Initialize weights using orthogonal initialization
         for layer in self.modules():

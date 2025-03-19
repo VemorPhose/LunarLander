@@ -13,11 +13,11 @@ class PolicyNetwork(nn.Module):
             nn.ReLU(),  # Changed to ReLU for better gradient flow
             nn.Linear(hidden_dim, hidden_dim),
             nn.ReLU(),
-            nn.Linear(hidden_dim, hidden_dim//2),  # Added extra layer with decrease in dims
-            nn.ReLU()
+            # nn.Linear(hidden_dim, hidden_dim//2),  # Added extra layer with decrease in dims
+            # nn.ReLU()
         )
-        self.actor = nn.Linear(hidden_dim//2, output_dim)
-        self.critic = nn.Linear(hidden_dim//2, 1)
+        self.actor = nn.Linear(hidden_dim, output_dim)
+        self.critic = nn.Linear(hidden_dim, 1)
         
         # Initialize weights using orthogonal initialization
         for layer in self.modules():
@@ -56,7 +56,7 @@ def train_agent():
     gamma = 0.99
     gae_lambda = 0.95
     clip_epsilon = 0.2
-    ppo_epochs = 10  # Increased epochs for better policy iteration
+    ppo_epochs = 8  # Increased epochs for better policy iteration
     batch_size = 2048  # Reduced batch size for more frequent updates
     mini_batch_size = 64
     ent_coef = 0.01
@@ -66,7 +66,7 @@ def train_agent():
     
     # Added learning rate annealing
     lr_start = 2.5e-4
-    lr_end = 5e-5
+    lr_end = 1e-4
     
     # Added reward normalization
     reward_running_mean = 0
