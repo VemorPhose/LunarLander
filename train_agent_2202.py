@@ -10,9 +10,9 @@ class PolicyNetwork(nn.Module):
         super(PolicyNetwork, self).__init__()
         self.shared = nn.Sequential(
             nn.Linear(input_dim, hidden_dim),
-            nn.ReLU(),  # Changed to ReLU for better gradient flow
+            nn.Tanh(),  # Changed to ReLU for better gradient flow
             nn.Linear(hidden_dim, hidden_dim),
-            nn.ReLU(),
+            nn.Tanh(),
             # nn.Linear(hidden_dim, hidden_dim//2),  # Added extra layer with decrease in dims
             # nn.ReLU()
         )
