@@ -53,20 +53,20 @@ def train_agent():
     optimizer = optim.Adam(policy.parameters(), lr=2.5e-4, eps=1e-5)  # Adjusted learning rate and epsilon
 
     # Hyperparameter improvements
-    gamma = 0.99
+    gamma = 0.999
     gae_lambda = 0.95
     clip_epsilon = 0.2
-    ppo_epochs = 8  # Increased epochs for better policy iteration
-    batch_size = 2048  # Reduced batch size for more frequent updates
-    mini_batch_size = 64
+    ppo_epochs = 16  # Increased epochs for better policy iteration
+    batch_size = 4096  # Reduced batch size for more frequent updates
+    mini_batch_size = 256
     ent_coef = 0.01
     vf_coef = 0.5
     max_grad_norm = 0.5
-    max_timesteps = 1e6
+    max_timesteps = 1e7
     
     # Added learning rate annealing
     lr_start = 2.5e-4
-    lr_end = 1e-4
+    lr_end = 1e-5
     
     # Added reward normalization
     reward_running_mean = 0
