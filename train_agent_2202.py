@@ -6,15 +6,13 @@ import torch.optim as optim
 from torch.distributions import Categorical
 
 class PolicyNetwork(nn.Module):
-    def __init__(self, input_dim=8, hidden_dim=256, output_dim=4):  # Increased network capacity
+    def __init__(self, input_dim=8, hidden_dim=256, output_dim=4):
         super(PolicyNetwork, self).__init__()
         self.shared = nn.Sequential(
             nn.Linear(input_dim, hidden_dim),
-            nn.Tanh(),  # Changed to ReLU for better gradient flow
+            nn.Tanh(), 
             nn.Linear(hidden_dim, hidden_dim),
             nn.Tanh(),
-            # nn.Linear(hidden_dim, hidden_dim//2),  # Added extra layer with decrease in dims
-            # nn.ReLU()
         )
         self.actor = nn.Linear(hidden_dim, output_dim)
         self.critic = nn.Linear(hidden_dim, 1)
@@ -50,25 +48,25 @@ def compute_advantages(rewards, values, dones, gamma=0.99, gae_lambda=0.95):
 def train_agent():
     env = gym.make('LunarLander-v3')
     policy = PolicyNetwork()
-    optimizer = optim.Adam(policy.parameters(), lr=2.5e-4, eps=1e-5)  # Adjusted learning rate and epsilon
+    optimizer = optim.Adam(policy.parameters(), lr=2.5e-4, eps=1e-5)
 
-    # Hyperparameter improvements
+    # Hyperparameters
     gamma = 0.999
     gae_lambda = 0.95
     clip_epsilon = 0.2
-    ppo_epochs = 16  # Increased epochs for better policy iteration
-    batch_size = 4096  # Reduced batch size for more frequent updates
+    ppo_epochs = 16
+    batch_size = 4096
     mini_batch_size = 256
     ent_coef = 0.01
     vf_coef = 0.5
     max_grad_norm = 0.5
     max_timesteps = 1e7
     
-    # Added learning rate annealing
+    # Learning rate annealing
     lr_start = 2.5e-4
     lr_end = 1e-5
     
-    # Added reward normalization
+    # Reward normalization
     reward_running_mean = 0
     reward_running_std = 1
     reward_alpha = 0.005  # Running mean decay factor
@@ -125,7 +123,7 @@ def train_agent():
         normalized_rewards = (rewards_np - reward_running_mean) / (reward_running_std + 1e-8)
         rews_tensor = torch.tensor(normalized_rewards, dtype=torch.float32)
 
-        # Add reward scaling factor
+        # Reward scaling factor
         rews_tensor = rews_tensor * 0.1  # Scale rewards to stabilize training
 
         obs_tensor = torch.from_numpy(np.array(obs_batch)).float()
